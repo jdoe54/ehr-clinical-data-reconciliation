@@ -1,0 +1,18 @@
+{
+    "patient_context": 
+    {
+        "age": 55,
+        "conditions": ["Asthma"],
+        "recent_labs": {"eGFR": 45}
+    },
+
+    "sources": 
+    [
+        {
+            "system": "Hospital EHR",
+            "medication": "Albuterol",
+            "last_updated": "2024-10-15",
+            "source_reliability": "high"
+        }
+    ]
+}
