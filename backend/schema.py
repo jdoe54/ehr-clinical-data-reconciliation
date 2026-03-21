@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 class PatientContext(BaseModel):
     age: int
@@ -9,7 +9,8 @@ class PatientContext(BaseModel):
 class MedicationSource(BaseModel):
     system: str
     medication: str
-    last_updated: str
+    last_filled: Optional[str] = None
+    last_updated: Optional[str] = None
     source_reliability: str
 
 class MedicationReconciliationRequest(BaseModel):
