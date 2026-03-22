@@ -1,5 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from ..schema import MedicationReconciliationRequest, MedicationReconciliationResponse
+from ..auth import verify_token
 from datetime import datetime
 from backend.services.llm_service import (
     judge_medication_reasonableness,
@@ -35,7 +36,7 @@ MAX_SCORE = MAX_WEIGHT_SCORE + MAX_ADDITIONAL_MED_SCORE + MAX_SOURCE_VALIDITY_SC
 
 
 @router.post("/medication")
-def reconcile_medication(data: MedicationReconciliationRequest):
+def reconcile_medication(data: MedicationReconciliationRequest, token: str = Depends(verify_token)):
 
     reliability_score = {}
     time_info = {}

@@ -9,8 +9,6 @@ client = TestClient(app)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SAMPLE_DATA_DIR = os.path.join(BASE_DIR, "sample_data")
 
-AUTH_HEADERS = {"X-API-Key": "dev-secret"}
-
 from unittest.mock import patch
 
 

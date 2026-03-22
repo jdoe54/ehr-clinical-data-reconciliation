@@ -1,5 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from ..schema import DataIssueDetected, DataQualityRequest, DataQualityResponse, Breakdown
+from ..auth import verify_token
 from datetime import datetime
 
 
@@ -14,7 +15,7 @@ AI_MODEL = "gpt-5.4-nano"
 
 
 @router.post("/data-quality")
-def validate_data_quality(data: DataQualityRequest):
+def validate_data_quality(data: DataQualityRequest, token: str = Depends(verify_token)):
 
     # high severity - physiologically implausible, 
     # medium severity - incomplete info and old date
@@ -54,24 +55,33 @@ def validate_data_quality(data: DataQualityRequest):
 
     # Check to see if date is not too long ago
          
-    source_date = datetime.strptime(data.last_updated, "%Y-%m-%d").date()
-    time_delta = current_date - source_date
+    if getattr(data, "last_updated"):
+        source_date = datetime.strptime(data.last_updated, "%Y-%m-%d").date()
+        time_delta = current_date - source_date
 
-    if time_delta.days > 180:
-        logger("last_updated", "Data is more than 6 months old.", "medium")
-        timeliness_score -= 50
-    elif time_delta.days < 0:
-        logger("last_updated", "Last updated date is in the future.", "low")
-        clinical_plausibility_score -= 40
-        timeliness_score = 0
+        if time_delta.days > 180:
+            logger("last_updated", "Data is more than 6 months old.", "medium")
+            timeliness_score -= 50
+        elif time_delta.days < 0:
+            logger("last_updated", "Last updated date is in the future.", "low")
+            clinical_plausibility_score -= 40
+            timeliness_score = 0
+        else:
+            reduce = (time_delta.days / 180) * 50
+            logger("last_updated", "Data is more than " + str(time_delta.days) + " days old", "low")
+            timeliness_score -= int(reduce)
+
+            print(reduce)
     else:
-        reduce = (time_delta.days / 180) * 50
-        timeliness_score -= int(reduce)
+        logger("last_updated", "Last updated date field is missing.", "low")
+        completeness_score -= 20
 
     
     # Check to see DOB is not in the future
 
     if getattr(data, "demographics"):
+
+        
         print("found demographics")
         if data.demographics.get("dob"):
             source_date = datetime.strptime(data.last_updated, "%Y-%m-%d").date()
@@ -89,7 +99,8 @@ def validate_data_quality(data: DataQualityRequest):
                 logger("demograhics", "Gender formatting issues.", "low")
                 accuracy_score -= 10
     else:
-        completeness_score -= 10
+        logger("demographics", "Missing demographics field", "low")
+        completeness_score -= 20
 
     # Check to see if allergies has any values
 
@@ -97,10 +108,11 @@ def validate_data_quality(data: DataQualityRequest):
     if hasattr(data, "allergies"):
    
         if len(data.allergies) == 0:
-            logger("allergies", "No allergies documented.", "medium")
-            completeness_score -= 10
+            logger("allergies", "No allergies documented. Include none documented", "low")
+            completeness_score -= 20
     else:
-        completeness_score -= 10
+        logger("allergies", "Missing allergies field", "low")
+        completeness_score -= 20
 
     # Check to see vital signs are not too crazy
 
@@ -124,13 +136,17 @@ def validate_data_quality(data: DataQualityRequest):
             hr = int(data.vital_signs.get("heart_rate"))
 
             if hr > MAX_BPM:
-                logger("heart rate", "Too high heart rate,", "high")
+                logger("heart_rate", "Too high heart rate,", "high")
                 clinical_plausibility_score -= 60
             elif hr < MIN_BPM:
-                logger("heart rate", "Too low heart rate.", "high")
+                logger("heart_rate", "Too low heart rate.", "high")
                 clinical_plausibility_score -= 60
+        else:
+            logger("heart_rate", "Missing heart rate field", "low")
+            completeness_score -= 5
     else:
-        completeness_score -= 10
+        logger("vital_signs", "Missing vital signs field", "low")
+        completeness_score -= 20
             
     
     # Check to see if medications do not duplicate
@@ -148,7 +164,17 @@ def validate_data_quality(data: DataQualityRequest):
             
             current_meds.add(med_word)
     else:
-        completeness_score -= 10
+        logger("medications", "Missing medications field", "low")
+        completeness_score -= 20
+
+    # Checks to see if conditions does not exist
+    if getattr(data, "conditions") == False:
+        logger("conditions", "Missing conditions field", "low")
+        completeness_score -= 20
+    else:
+        if len(data.conditions) == 0:
+            logger("conditions", "No conditions documented. Include none documented", "low")
+            completeness_score -= 20
 
     issues = []
     for entry in log:
