@@ -90,7 +90,19 @@ def reconcile_medication(data: MedicationReconciliationRequest):
 
         # Medication, say yes if good. Say no if not.
 
-        medication_input = "Based on the patient age, which is " + str(current_age) + " and their conditions of " + str(current_condition) + " with the following procedures done: " + str(recent_procedures) + ", is the current medication sensible? Here is the medication: " + source.medication + ". Say only Yes if this is good. Say No if this is not sensible."
+        medication_input = f"""
+        Evaluate whether the following medication is reasonable for the patient context.
+
+        Age: {current_age}
+        Conditions: {current_condition}
+        Recent procedures: {recent_procedures}
+        Medication: {source.medication}
+
+        Return exactly one token:
+        Yes
+        or
+        No
+        """
 
         medication_response = client.responses.create(
             model=AI_MODEL,
@@ -125,21 +137,6 @@ def reconcile_medication(data: MedicationReconciliationRequest):
 
             source_date = datetime.strptime(recency, "%Y-%m-%d").date()
         
-            """
-            if recent_date == None or recent_date < source_date:
-                if recent_date_index is not None:
-                    reliability_score[recent_date_index] += MAX_REDUCE_RECENT_SCORE
-                    logger(index, "Reduce 2 for not being recent enough.")
-
-                reliability_score[index] += MAX_MOST_RECENT_SCORE
-                logger(index, "Add 3 for being most recent.")
-
-                recent_date = source_date
-                recent_date_index = index
-            else:
-                logger(index, "Add 1 for having a date.")
-                reliability_score[index] += RECENT_DATE_FILLED_SCORE
-            """
             # Get relative distance from current date to current date
 
             time_delta = current_date - source_date
@@ -212,7 +209,7 @@ def reconcile_medication(data: MedicationReconciliationRequest):
 
     confidence = 0.7 * normalized_strength + 0.3 * margin
     
-    print("CONFIDENCE LEVELS: " + str(round(confidence, 3)))
+    #print("CONFIDENCE LEVELS: " + str(round(confidence, 3)))
 
 
     def build_case(source: dict):
@@ -244,7 +241,7 @@ def reconcile_medication(data: MedicationReconciliationRequest):
     f"Do not use bullets, numbering, or newline characters."
     )
      
-    print(reasoning_input)
+    #print(reasoning_input)
 
     reasoning_response = client.responses.create(
         model=AI_MODEL,
@@ -254,11 +251,11 @@ def reconcile_medication(data: MedicationReconciliationRequest):
 
     reasoning_result = reasoning_response.output_text.split("||")
 
-    print(reasoning_response.output_text)
+    #print(reasoning_response.output_text)
 
-    print("==================================")
+    #print("==================================")
 
-    print(reasoning_result)
+    #print(reasoning_result)
 
     recommended_action_list = ([]
         if reasoning_result[1].strip() == "None"

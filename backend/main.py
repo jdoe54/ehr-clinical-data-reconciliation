@@ -1,10 +1,10 @@
 from fastapi import FastAPI
-from backend.routers import reconcile
+from backend.routers import reconcile, validate
 
 app = FastAPI()
 
 app.include_router(reconcile.router)
-#app.include_router(validate.router)
+app.include_router(validate.router)
 
 @app.get("/")
 def read_root():
@@ -14,10 +14,4 @@ def read_root():
 
 
 
-"""
 
-@app.post("/api/validate/data-quality")
-def validate_data():
-    return {"validate": "data-quality"}
-
-"""
