@@ -122,7 +122,7 @@ def test_reconcile_case_4_returns_200(mock_judge, mock_reasoning):
     )
     data = response.json()
 
-    print(data)
+   
     assert data['clinical_safety_check'] == "FAILED"
     assert response.status_code == 200
 

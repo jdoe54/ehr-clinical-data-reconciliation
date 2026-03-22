@@ -1,0 +1,12 @@
+{
+  "demographics": {
+    "name": "John Doe",
+    "dob": "1955-03-15",
+    "gender": "M"
+  },
+  "medications": [],
+  "allergies": [],
+  "conditions": [],
+  "vital_signs": {},
+  "last_updated": "2026-02-15"
+}

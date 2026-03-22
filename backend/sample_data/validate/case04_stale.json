@@ -1,0 +1,19 @@
+{
+  "demographics": {
+    "name": "John Doe",
+    "dob": "1955-03-15",
+    "gender": "M"
+  },
+  "medications": [
+    "Metformin 500mg"
+  ],
+  "allergies": [],
+  "conditions": [
+    "Type 2 Diabetes"
+  ],
+  "vital_signs": {
+    "blood_pressure": "130/82",
+    "heart_rate": 70
+  },
+  "last_updated": "2023-11-01"
+}

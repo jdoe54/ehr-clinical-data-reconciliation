@@ -1,15 +1,12 @@
 from fastapi import APIRouter
 from ..schema import DataIssueDetected, DataQualityRequest, DataQualityResponse, Breakdown
 from datetime import datetime
-from openai import OpenAI
-from dotenv import load_dotenv
 
-import os
+
 import re
 
 
-load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 router = APIRouter(prefix="/api/validate", tags=["validate"])
 
 AI_MODEL = "gpt-5.4-nano"
@@ -51,7 +48,7 @@ def validate_data_quality(data: DataQualityRequest):
 
     for field, value in enumerate(data):
         if not value:
-            logger(field, "Incomplete data at " + field, "medium")
+            logger(field, "Incomplete data at " + field + ".", "medium")
             completeness_score -= 10 
     
 
@@ -175,4 +172,6 @@ def validate_data_quality(data: DataQualityRequest):
         issues_detected=issues
 
     )
+
+
     return response
