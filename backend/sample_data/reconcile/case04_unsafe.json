@@ -1,0 +1,29 @@
+{
+  "patient_context": {
+    "age": 82,
+    "conditions": ["Type 2 Diabetes", "Chronic Kidney Disease"],
+    "recent_labs": {
+      "eGFR": 22
+    }
+  },
+  "sources": [
+    {
+      "system": "Hospital EHR",
+      "medication": "Metformin 1000mg twice daily",
+      "last_updated": "2025-02-01",
+      "source_reliability": "high"
+    },
+    {
+      "system": "Primary Care",
+      "medication": "Metformin 500mg daily",
+      "last_updated": "2025-01-28",
+      "source_reliability": "high"
+    },
+    {
+      "system": "Pharmacy",
+      "medication": "Metformin 1000mg daily",
+      "last_filled": "2025-02-03",
+      "source_reliability": "medium"
+    }
+  ]
+}

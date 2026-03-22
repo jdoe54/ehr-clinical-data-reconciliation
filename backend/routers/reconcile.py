@@ -1,19 +1,17 @@
 from fastapi import APIRouter
 from ..schema import MedicationReconciliationRequest, MedicationReconciliationResponse
 from datetime import datetime
-from openai import OpenAI
-from dotenv import load_dotenv
+from backend.services.llm_service import (
+    judge_medication_reasonableness,
+    generate_reconciliation_reasoning,
+)
 
 import os
 import re
 
 
-load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 router = APIRouter(prefix="/api/reconcile", tags=["reconcile"])
-
-AI_MODEL = "gpt-5.4-nano"
-
 
 
 MAX_WEIGHT_SCORE = 5
@@ -90,29 +88,17 @@ def reconcile_medication(data: MedicationReconciliationRequest):
 
         # Medication, say yes if good. Say no if not.
 
-        medication_input = f"""
-        Evaluate whether the following medication is reasonable for the patient context.
-
-        Age: {current_age}
-        Conditions: {current_condition}
-        Recent procedures: {recent_procedures}
-        Medication: {source.medication}
-
-        Return exactly one token:
-        Yes
-        or
-        No
-        """
-
-        medication_response = client.responses.create(
-            model=AI_MODEL,
-            reasoning={"effort": "high"},
-            input=medication_input
+    
+        medication_ok = judge_medication_reasonableness(
+            current_age=current_age,
+            current_condition=current_condition,
+            recent_procedures=recent_procedures,
+            medication=source.medication,
         )
 
-        if medication_response.output_text.upper() == "YES":
+        if medication_ok.upper() == "YES":
             logger(index, "No changes, not outrageous.")
-        elif medication_response.output_text.upper() == "NO":
+        elif medication_ok.upper() == "NO":
             logger(index, "Reduce 3 for being outrageous.")
             reliability_score[index] += MAX_OUTRAGEOUS_SCORE
 
@@ -203,6 +189,10 @@ def reconcile_medication(data: MedicationReconciliationRequest):
     #print("WINNER: " + str(winning_score) + " | Entry: " + str(winning_index))
     #print("RUNNER UP: " + str(runner_up_score) + " | Entry: " + str(runner_up_index))
 
+    if runner_up_index is None:
+        runner_up_score = 0
+        runner_up_index = -1
+
     normalized_strength = winning_score / MAX_SCORE
 
     margin = (winning_score - runner_up_score) / max(winning_score, 1e-9)
@@ -226,47 +216,33 @@ def reconcile_medication(data: MedicationReconciliationRequest):
         return complete_case
 
     winner_case = build_case(medication_list[winning_index])
-    runner_case = build_case(medication_list[runner_up_index])
+    runner_case = None
 
-    reasoning_input = (
-    f"Patient age: {current_age}. "
-    f"Conditions: {current_condition}. "
-    f"Recent procedures: {recent_procedures}. "
-    f"Confidence level: {confidence}. "
-    f"Explain in less than 50 words why {winner_case} is better than {runner_case}. "
-    f"Return exactly three sections separated by ||. "
-    f"Section 1: reasoning, one sentence, no line breaks. "
-    f"Section 2: recommended actions separated only by @@. If none, write None. "
-    f"Section 3: output only PASSED or FAILED. "
-    f"Do not use bullets, numbering, or newline characters."
-    )
-     
-    #print(reasoning_input)
-
-    reasoning_response = client.responses.create(
-        model=AI_MODEL,
-        reasoning={"effort": "high"},
-        input=reasoning_input
-    )
-
-    reasoning_result = reasoning_response.output_text.split("||")
-
-    #print(reasoning_response.output_text)
-
-    #print("==================================")
-
-    #print(reasoning_result)
-
-    recommended_action_list = ([]
-        if reasoning_result[1].strip() == "None"
-        else [x.strip() for x in reasoning_result[1].split("@@")]
-    )
+    print(str(runner_up_index) + " is runner up")
+    print(winning_index)
     
+    if runner_up_index is not winning_index:
+
+        print("Winning index is not the same")
+        runner_case = build_case(medication_list[runner_up_index])
+
+    print("Still going hehe")
+ 
+
+    reasoning_result = generate_reconciliation_reasoning(
+        current_age=current_age,
+        current_condition=current_condition,
+        recent_procedures=recent_procedures,
+        confidence=confidence,
+        winner_case=winner_case,
+        runner_case=runner_case,
+    )
+
     response = MedicationReconciliationResponse(
         reconciliated_medication = medication_list[winning_index].medication,
-        reasoning = reasoning_result[0],
-        recommended_actions = recommended_action_list,
-        clinical_safety_check = reasoning_result[2],
+        reasoning = reasoning_result['reasoning'],
+        recommended_actions = reasoning_result['recommended_actions'],
+        clinical_safety_check = reasoning_result['status'],
         confidence_score = round(confidence, 3)
     )
 
