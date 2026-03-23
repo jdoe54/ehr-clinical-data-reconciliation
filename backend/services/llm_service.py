@@ -31,7 +31,7 @@ def judge_medication_reasonableness(
     No
     """
 
-    print(medication_input)
+
 
     response = client.responses.create(
         model=AI_MODEL,

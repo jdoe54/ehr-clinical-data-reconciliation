@@ -9,7 +9,7 @@ client = TestClient(app)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SAMPLE_DATA_DIR = os.path.join(BASE_DIR, "sample_data")
 
-from unittest.mock import patch
+
 
 
 def load_case(subpath: str, filename: str):
@@ -47,7 +47,7 @@ def test_validate_case_2():
 
 
 def test_validate_case_3():
-    # There are incomplete fields 
+
     payload = load_case("validate", "case03_incomplete.json")
 
     response = client.post(

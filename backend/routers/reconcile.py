@@ -10,10 +10,7 @@ from backend.services.llm_service import (
 
 import re
 
-
-
 router = APIRouter(prefix="/api/reconcile", tags=["reconcile"])
-
 
 MAX_WEIGHT_SCORE = 5
 
@@ -143,22 +140,16 @@ def reconcile_medication(data: MedicationReconciliationRequest, token: str = Dep
     # Reduce score if times are very close to one another
 
     time_info_list = time_info.items()
-
-    
-
     for first_index, first_source in enumerate(time_info_list):
         for second_index, second_source in enumerate(time_info_list):
             if first_index != second_index:
                 difference = abs(first_source[1].days - second_source[1].days)
                 
-                if difference < 10:
-                   
+                if difference < 10:  
                     logger(first_index, "Reduce 2 for being close in time distance by 10 days.")
                     reliability_score[first_index] += MAX_REDUCE_CLOSE_DAY_SCORE
                     break
                 elif difference < 20:
-                    
-                    
                     logger(first_index, "Reduce 1 for being close in time distance by 20 days.")
                     reliability_score[first_index] += REDUCE_CLOSE_DAY_SCORE
                     break
@@ -176,20 +167,15 @@ def reconcile_medication(data: MedicationReconciliationRequest, token: str = Dep
         print("SCORE: " + str(reliability_score[index]))
 
         if winning_score is not None:
-            #print("Found winning score not none")
-            #print("Comparing against " + str(reliability_score[index]) + " against " + str(winning_score))
+           
             if reliability_score[index] >= winning_score:
                 runner_up_index = winning_index
                 runner_up_score = winning_score
 
         if winning_score is None or reliability_score[index] >= winning_score:
-            #print("Winning score being changed due to " + str(index))
             winning_score = reliability_score[index]
             winning_index = index
     
-    #print("WINNER: " + str(winning_score) + " | Entry: " + str(winning_index))
-    #print("RUNNER UP: " + str(runner_up_score) + " | Entry: " + str(runner_up_index))
-
     if runner_up_index is None:
         runner_up_score = 0
         runner_up_index = -1
@@ -199,12 +185,8 @@ def reconcile_medication(data: MedicationReconciliationRequest, token: str = Dep
     margin = (winning_score - runner_up_score) / max(winning_score, 1e-9)
 
     confidence = 0.7 * normalized_strength + 0.3 * margin
-    
-    #print("CONFIDENCE LEVELS: " + str(round(confidence, 3)))
-
 
     def build_case(source: dict):
-        
         parts = [
             getattr(source, "system", None),
             getattr(source, "medication", None),
@@ -218,17 +200,10 @@ def reconcile_medication(data: MedicationReconciliationRequest, token: str = Dep
 
     winner_case = build_case(medication_list[winning_index])
     runner_case = None
-
-    print(str(runner_up_index) + " is runner up")
-    print(winning_index)
     
     if runner_up_index is not winning_index:
-
-        print("Winning index is not the same")
         runner_case = build_case(medication_list[runner_up_index])
 
-    print("Still going hehe")
- 
 
     reasoning_result = generate_reconciliation_reasoning(
         current_age=current_age,

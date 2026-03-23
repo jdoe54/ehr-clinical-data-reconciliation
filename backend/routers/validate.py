@@ -71,7 +71,6 @@ def validate_data_quality(data: DataQualityRequest, token: str = Depends(verify_
             logger("last_updated", "Data is more than " + str(time_delta.days) + " days old", "low")
             timeliness_score -= int(reduce)
 
-            print(reduce)
     else:
         logger("last_updated", "Last updated date field is missing.", "low")
         completeness_score -= 20
@@ -80,9 +79,6 @@ def validate_data_quality(data: DataQualityRequest, token: str = Depends(verify_
     # Check to see DOB is not in the future
 
     if getattr(data, "demographics"):
-
-        
-        print("found demographics")
         if data.demographics.get("dob"):
             source_date = datetime.strptime(data.last_updated, "%Y-%m-%d").date()
             time_delta = current_date - source_date
@@ -117,7 +113,6 @@ def validate_data_quality(data: DataQualityRequest, token: str = Depends(verify_
     # Check to see vital signs are not too crazy
 
     if getattr(data, "vital_signs"):
-        print("found blood pressure")
         if data.vital_signs.get("blood_pressure"):
             bp = data.vital_signs.get("blood_pressure").split("/")
 
@@ -152,7 +147,6 @@ def validate_data_quality(data: DataQualityRequest, token: str = Depends(verify_
     # Check to see if medications do not duplicate
 
     if getattr(data, "medications"):
-        print("found medication")
         current_meds = set()
 
         for med in data.medications:
