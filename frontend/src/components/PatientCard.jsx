@@ -12,12 +12,12 @@ export default function PatientCard({ patient, isSelected, onSelect }) {
         <div>
           <h3 className="text-lg font-semibold text-slate-800">{patient.name}</h3>
           <p className="text-sm text-slate-500">
-            Age {patient.reconcilePayload['patient_context'].age} • {patient.reconcilePayload['patient_context'].gender}
+            Age {patient.reconcilePayload['patient_context'].age ?? "N/A"} • {patient.dataQualityPayload['demographics'].gender ?? "N/A Gender"}
           </p>
         </div>
 
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-          ID {patient.id}
+          ID {patient.id ?? "UNKNOWN"}
         </span>
       </div>
 
@@ -38,12 +38,12 @@ export default function PatientCard({ patient, isSelected, onSelect }) {
       <div className="mt-3">
         <p className="text-sm font-medium text-slate-700">Medications</p>
         <p className="mt-1 text-sm text-slate-600">
-          {patient.dataQualityPayload.medications.join(", ")}
+          {patient.dataQualityPayload.medications?.length ? patient.dataQualityPayload.medications.join(", ") : "No medications documented."}
         </p>
       </div>
 
       <p className="mt-3 text-xs text-slate-400">
-        Last updated: {patient.dataQualityPayload['last_updated']}
+        Last updated: {patient.dataQualityPayload['last_updated'] ?? "N/A"}
       </p>
     </button>
   );

@@ -2,11 +2,7 @@ import { useState } from 'react'
 import { reconcileMedication, validateDataQuality } from './services/api'
 import { patients_data } from "./sample_data/patient";
 import PatientCard from "./components/PatientCard";
-
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-//import './App.css'
+import DataQualityModal from "./components/DataQualityModal";
 
 const sampleReconcile = `{
   "patient_id": 
@@ -29,13 +25,16 @@ export default function App() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(patients_data[0]);
+  const [showQualityModal, setShowQualityModal] = useState(false);
 
   async function handleReconcile() {
     try {
       setLoading(true);
       setError("");
-      const payload = JSON.parse(reconcileInput);
+
+      const payload = selectedPatient.reconcilePayload;
       const data = await reconcileMedication(payload);
+
       setReconcileResult(data);
     } catch (err) {
       setError(err.message);
@@ -48,16 +47,23 @@ export default function App() {
     try {
       setLoading(true);
       setError("");
-      const payload = JSON.parse(qualityInput);
+
+      const payload = selectedPatient.dataQualityPayload
       const data = await validateDataQuality(payload);
+
       setQualityResult(data);
+      setShowQualityModal(true);
     } catch (err) {
+      console.error("Handle quality error: ", err)
       setError(err.message);
     } finally {
       setLoading(false);
     }
   }
 
+  
+
+  
   return (
     <div className="flex min-h-screen w-full bg-gray-100">
       <aside className="w-48 bg-green-700 text-white p-6">
@@ -70,7 +76,7 @@ export default function App() {
 
       
 
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 ">
         <h2 className="mb-6 text-3xl font-bold text-slate-800">Patients</h2>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -94,28 +100,28 @@ export default function App() {
               <div className="rounded-xl bg-slate-50 p-4">
                 <p className="text-sm font-medium text-slate-500">Age</p>
                 <p className="mt-1 text-lg font-semibold text-slate-800">
-                  {selectedPatient.reconcilePayload['patient_context'].age}
+                  {selectedPatient.reconcilePayload['patient_context'].age ?? "N/A"}
                 </p>
               </div>
 
               <div className="rounded-xl bg-slate-50 p-4">
                 <p className="text-sm font-medium text-slate-500">DOB</p>
                 <p className="mt-1 text-lg font-semibold text-slate-800">
-                  {selectedPatient.dataQualityPayload.demographics.dob}
+                  {selectedPatient.dataQualityPayload.demographics.dob ?? "N/A"}
                 </p>
               </div>
 
               <div className="rounded-xl bg-slate-50 p-4">
                 <p className="text-sm font-medium text-slate-500">Gender</p>
                 <p className="mt-1 text-lg font-semibold text-slate-800">
-                  {selectedPatient.dataQualityPayload.demographics.gender}
+                  {selectedPatient.dataQualityPayload.demographics.gender ?? "N/A"}
                 </p>
               </div>
 
               <div className="rounded-xl bg-slate-50 p-4">
                 <p className="text-sm font-medium text-slate-500">Last Updated</p>
                 <p className="mt-1 text-lg font-semibold text-slate-800">
-                  {selectedPatient.dataQualityPayload['last_updated']}
+                  {selectedPatient.dataQualityPayload['last_updated'] ?? "N/A"}
                 </p>
               </div>
             </div>
@@ -143,90 +149,29 @@ export default function App() {
               </ul>
             </div>
 
-            <button onClick={handleReconcile} className="mt-6 rounded-xl bg-slate-900 px-5 py-3 font-medium text-white shadow hover:bg-slate-600">
-              Run Reconciliation
-            </button>
+            <div className="mt-6 flex flex-row items-center gap-4">
+              <button onClick={handleReconcile} className="rounded-xl bg-slate-900 px-5 py-3 font-medium text-white shadow hover:bg-slate-600">
+                Run Reconciliation
+              </button>
 
-            <button onClick={handleQuality} className="mt-6 rounded-xl bg-slate-900 px-5 py-3 font-medium text-white shadow hover:bg-slate-600">
-              Run Data Quality
-            </button>
+              <button onClick={handleQuality} className="rounded-xl bg-slate-900 px-5 py-3 font-medium text-white shadow hover:bg-slate-600">
+                Run Data Quality
+              </button>
+            </div>
+            
           </div>
         </div>
       </main>
 
-      
+      {showQualityModal && (
+        <DataQualityModal 
+          result={qualityResult} 
+          onClose={() => setShowQualityModal(false)}
+        />
+      )}
+
     </div>
   );
 }
 
 
-/*
-
-<div className="min-h-screen bg-slate-50 p-6">
-      <div className="mx-auto max-w-5xl space-y-6">
-        
-
-          <h1 className="text-3xl font-bold">Clinical Dashboard</h1>
-
-
-          {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-              {error}
-            </div>
-          )}
-
-         
-          <section className="rounded-2xl bg-white p-6 shadow">
-            <h2 className="mb-3 text-xl font-semibold">Medication Reconciliation</h2>
-            <textarea
-              className="h-56 w-full rounded-xl border p-3 font-mono text-sm"
-              value={reconcileInput}
-              onChange={(e) => setReconcileInput(e.target.value)}
-            />
-            <div className="mt-3">
-              <button
-                onClick={handleReconcile}
-                className="rounded-xl bg-slate-900 px-4 py-2 text-white"
-              >
-                {loading ? "Submitting..." : "Submit"}
-              </button>
-            </div>
-
-            {reconcileResult && (
-              <pre className="mt-4 overflow-auto rounded-xl bg-slate-100 p-4 text-sm">
-                {JSON.stringify(reconcileResult, null, 2)}
-              </pre>
-            )}
-          </section>
-
-          <section className="rounded-2xl bg-white p-6 shadow">
-            <h2 className="mb-3 text-xl font-semibold">Data Quality Validation</h2>
-            <textarea
-              className="h-56 w-full rounded-xl border p-3 font-mono text-sm"
-              value={qualityInput}
-              onChange={(e) => setQualityInput(e.target.value)}
-            />
-            <div className="mt-3">
-              <button
-                onClick={handleQuality}
-                className="rounded-xl bg-slate-900 px-4 py-2 text-white"
-              >
-                {loading ? "Submitting..." : "Submit"}
-              </button>
-            </div>
-
-            {qualityResult && (
-              <pre className="mt-4 overflow-auto rounded-xl bg-slate-100 p-4 text-sm">
-                {JSON.stringify(qualityResult, null, 2)}
-              </pre>
-            )}
-          </section>
-          
-         
-        </div>
-
-        
-    </div>
-
-    
-*/

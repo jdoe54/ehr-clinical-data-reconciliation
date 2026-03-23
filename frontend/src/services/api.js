@@ -19,6 +19,7 @@ export async function reconcileMedication(payload) {
 }
 
 export async function validateDataQuality(payload) {
+
     const response = await fetch(`${API_BASE}/api/validate/data-quality`, {
         method: "POST",
         headers: {
