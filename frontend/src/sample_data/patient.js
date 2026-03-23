@@ -1,4 +1,4 @@
-const patients_data = [
+export const patients_data = [
 
     {
         id: 1, 
@@ -17,13 +17,29 @@ const patients_data = [
                 "source_reliability": "high"
             }]
         },
+        dataQualityPayload: {
+            demographics: {
+                name: "John Doe",
+                dob: "1970-03-15",
+                gender: "M"
+            },
+            medications: ["Albuterol inhaler"],
+            allergies: ["Penicillin"],
+            conditions: ["Asthma"],
+            vital_signs: {
+                blood_pressure: "128/78",
+                heart_rate: 72
+            },
+            last_updated: "2026-02-15"
+        }
+        
     },
     {
         id: 2,
         name: "Jane Doe",
         reconcilePayload: {
             "patient_context": {
-                "age": 67,
+                "age": 64,
                 "conditions": ["Type 2 Diabetes", "Hypertension"],
                 "recent_labs": {"eGFR": 45}
             },
@@ -49,11 +65,36 @@ const patients_data = [
                     "source_reliability": "medium"
                 }
             ]
+        },
+        dataQualityPayload: {
+            "demographics": 
+                {
+                    "name": "Jane Doe", 
+                    "dob": "1961-03-15", 
+                    "gender": "F"
+                },
+
+            "medications": 
+                [
+                    "Metformin 500mg", 
+                    "Lisinopril 10mg"
+                ],
+            "allergies": [],
+            "conditions": 
+                [
+                    "Type 2 Diabetes"
+                ],
+            "vital_signs": 
+                {
+                    "blood_pressure": "340/180", 
+                    "heart_rate": 72
+                },
+            "last_updated": "2024-06-15"
         }
     },
     {
         id: 3,
-        name: "John Doe II",
+        name: "Bob Doe",
         reconcilePayload: {
             "patient_context": {
                 "age": 67,
@@ -81,11 +122,24 @@ const patients_data = [
                     "source_reliability": "medium"
                 }
             ]
+        },
+        dataQualityPayload: {
+            "demographics": {
+                "name": "Bob Doe",
+                "dob": "1958-02-11",
+                "gender": "M"
+            },
+            "medications": [],
+            "allergies": [],
+            "conditions": [],
+            "vital_signs": {},
+            "last_updated": "2026-02-15"
         }
+
     }, 
     {
         id: 4,
-        name: "Jane Doe II",
+        name: "Samantha Doe",
         reconcilePayload: {
             "patient_context": {
                 "age": 82,
@@ -112,6 +166,25 @@ const patients_data = [
                 "source_reliability": "medium"
                 }
             ]
+        },
+        dataQualityPayload: {
+            "demographics": {
+                "name": "Samantha Doe",
+                "dob": "1941-08-14",
+                "gender": "F"
+            },
+            "medications": [
+                "Metformin 500mg"
+            ],
+            "allergies": [],
+            "conditions": [
+                "Type 2 Diabetes"
+            ],
+            "vital_signs": {
+                "blood_pressure": "130/82",
+                "heart_rate": 70
+            },
+            "last_updated": "2023-11-01"
         }
 
     }
