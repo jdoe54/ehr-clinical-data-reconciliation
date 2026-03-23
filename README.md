@@ -2,6 +2,8 @@
 
 A full-stack take-home project that simulates an AI-assisted EHR review workflow for clinicians. The application allows a user to review patient records, run medication reconciliation, evaluate data quality, and inspect AI-generated reasoning, confidence, and recommended actions.
 
+![Website Display](https://i.gyazo.com/6636bd58a2d0c101df8d1004276ddb44.gif)
+
 # Overview
 
 This project includes:
