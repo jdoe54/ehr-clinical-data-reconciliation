@@ -16,7 +16,7 @@ The goal was to build a simple but clinician-friendly dashboard that presents AI
 
 # Tech Stack
 ## Backend
-### Python
+### Python 3.13
 - FastAPI — API routing and backend framework
 - FastAPI TestClient / pytest — backend unit testing
 - Pydantic — request and response validation
