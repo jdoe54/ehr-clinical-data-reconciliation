@@ -1,5 +1,14 @@
 name = "ehr-clinical-data-reconciliation"
 version = "0.1.0"
+requires-python = ">=3.10"
 dependencies = [
     "fastapi[standard]",
+    "pydantic",
+    "openai",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
 ]
