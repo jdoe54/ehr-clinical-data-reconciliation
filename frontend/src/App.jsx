@@ -3,49 +3,42 @@ import { reconcileMedication, validateDataQuality } from './services/api'
 import { patients_data } from "./sample_data/patient";
 import PatientCard from "./components/PatientCard";
 import DataQualityModal from "./components/DataQualityModal";
-
-const sampleReconcile = `{
-  "patient_id": 
-}`;
-
-const sampleQuality = `{
-  "demographics": {},
-  "medications": [],
-  "allergies": [],
-  "conditions": [],
-  "vital_signs": {},
-  "last_updated": "2026-03-01"
-}`;
+import ReconciliationModal from './components/ReconciliationModal';
+import LoadingOverlay from './components/LoadingOverlay';
 
 export default function App() {
-  const [reconcileInput, setReconcileInput] = useState(sampleReconcile);
-  const [qualityInput, setQualityInput] = useState(sampleQuality);
-  const [reconcileResult, setReconcileResult] = useState(null);
-  const [qualityResult, setQualityResult] = useState(null);
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  const [qualityResult, setQualityResult] = useState(null);
   const [selectedPatient, setSelectedPatient] = useState(patients_data[0]);
   const [showQualityModal, setShowQualityModal] = useState(false);
 
+  const [reconcileResult, setReconcileResult] = useState(null);
+  const [showReconcileModal, setShowReconcileModal] = useState(null);
+  const [reconcileLoading, setReconcileLoading] = useState(false);
+
   async function handleReconcile() {
     try {
-      setLoading(true);
       setError("");
+      setReconcileLoading(true);
 
       const payload = selectedPatient.reconcilePayload;
       const data = await reconcileMedication(payload);
 
       setReconcileResult(data);
+      setShowReconcileModal(true);
     } catch (err) {
       setError(err.message);
+      console.error("handleReconcile error: ", err);
     } finally {
-      setLoading(false);
+      setReconcileLoading(false);
     }
   }
 
   async function handleQuality() {
     try {
-      setLoading(true);
       setError("");
 
       const payload = selectedPatient.dataQualityPayload
@@ -56,8 +49,6 @@ export default function App() {
     } catch (err) {
       console.error("Handle quality error: ", err)
       setError(err.message);
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -167,6 +158,17 @@ export default function App() {
         <DataQualityModal 
           result={qualityResult} 
           onClose={() => setShowQualityModal(false)}
+        />
+      )}
+
+      {reconcileLoading && (
+        <LoadingOverlay message="Running reconciliation..." />
+      )}
+
+      {showReconcileModal && (
+        <ReconciliationModal
+          result={reconcileResult}
+          onClose={() => setShowReconcileModal(false)}
         />
       )}
 
