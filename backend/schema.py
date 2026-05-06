@@ -48,3 +48,14 @@ class DataQualityResponse(BaseModel):
     breakdown: Breakdown
     issues_detected: List[DataIssueDetected]
 
+
+
+class MedicationCreate(MedicationSource):
+    pass
+
+class MedicationRead(MedicationSource):
+    id: int
+
+    model_config = {
+        "from_attributes": True
+    }
