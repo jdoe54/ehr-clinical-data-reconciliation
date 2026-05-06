@@ -6,6 +6,9 @@ dependencies = [
     "pydantic",
     "openai",
     "python-dotenv",
+    "psycopg[binary]",
+    "sqlachemy",
+    "alembic",
 ]
 
 [project.optional-dependencies]
