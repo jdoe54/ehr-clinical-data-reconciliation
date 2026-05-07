@@ -83,9 +83,11 @@ def get_or_create_patient(
     date_of_birth=None,
     gender=None,
     age_years=None,
+    last_updated=None
 ):
     patient = db.query(Patient).filter(Patient.mrn == mrn).first()
     parsed_dob = parse_date(date_of_birth)
+    parsed_last_updated = parse_date(last_updated)
 
     if patient:
         if first_name is not None:
@@ -96,6 +98,9 @@ def get_or_create_patient(
 
         if parsed_dob is not None:
             patient.date_of_birth = parsed_dob
+
+        if parsed_last_updated is not None:
+            patient.last_updated = parsed_last_updated
 
         if gender is not None:
             patient.gender = gender
@@ -113,6 +118,7 @@ def get_or_create_patient(
         date_of_birth=parsed_dob,
         gender=gender,
         age_years=age_years,
+        last_updated = parsed_last_updated
     )
 
     db.add(patient)
@@ -450,18 +456,17 @@ def seed_validate_cases(db):
         file_path = case_file["file_path"]
         data = case_file["data"]
 
-        first_name, last_name = split_name(data.get("name"))
+        first_name, last_name = split_name(data.get("demographics").get("name"))
 
         patient = get_or_create_patient(
             db=db,
             mrn=f"VALIDATE-{file_path.stem.upper()}",
             first_name=first_name,
             last_name=last_name,
-            date_of_birth=data.get("dob"),
-            gender=data.get("gender"),
+            date_of_birth=data.get("demographics").get("dob"),
+            gender=data.get("demographics").get("gender"),
+            last_updated=data.get("last_updated")
         )
-
-        last_updated = data.get("last_updated")
 
         for med in data.get("medications", []):
             med_name = get_medication_name(med)
@@ -472,7 +477,7 @@ def seed_validate_cases(db):
                 medication_name=med_name,
                 system="validate",
                 source_reliability="unknown",
-                last_updated=last_updated,
+  
             )
 
         for allergy in data.get("allergies", []):
@@ -508,7 +513,7 @@ def seed_validate_cases(db):
             systolic_bp=systolic,
             diastolic_bp=diastolic,
             heart_rate=vital_signs.get("heart_rate"),
-            last_updated=last_updated,
+
         )
 
     print(f"Seeded {len(cases)} validate cases.")

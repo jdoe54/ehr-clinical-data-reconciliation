@@ -44,6 +44,7 @@ def reconcile_medication(request: DatabasePatientRequest, db: Session = Depends(
 
     data = build_patient_record(db, patient_id=request.patient_id, mrn=request.mrn)
 
+    print(data)
     # data: MedicationReconciliationRequest, token: str = Depends(verify_token)
 
     reliability_score = {}
@@ -66,6 +67,7 @@ def reconcile_medication(request: DatabasePatientRequest, db: Session = Depends(
     current_condition = data.get("conditions")
     current_age = data.get("age_years")
     recent_procedures = data.get("lab_results")
+    
 
     recent_date = None
     recent_date_index = None
@@ -77,8 +79,8 @@ def reconcile_medication(request: DatabasePatientRequest, db: Session = Depends(
         actions[index].append(message)
 
     for index, source in enumerate(medication_list):
-        location = source.system
-
+        location = source.get("system")
+        reliability = source.get("source_reliability")
         # Given a base score based on location. Max score is 5.
 
         reliability_score[index] = SOURCE_WEIGHTS[location]
@@ -88,7 +90,7 @@ def reconcile_medication(request: DatabasePatientRequest, db: Session = Depends(
 
         # Found additional sources with similar medication, an extra 1 point.
 
-        meds = re.search(r'(\d+(?:\.\d+)?)\s*(mg|mcg|g|mL|units|tablets)(?:\s*/\s*(\d+(?:\.\d+)?)\s*(mL|L))?', source.medication, re.IGNORECASE)
+        meds = re.search(r'(\d+(?:\.\d+)?)\s*(mg|mcg|g|mL|units|tablets)(?:\s*/\s*(\d+(?:\.\d+)?)\s*(mL|L))?', source.get("medication"), re.IGNORECASE)
 
         if meds in previous_entries:
             reliability_score[index] += MAX_ADDITIONAL_MED_SCORE
@@ -103,7 +105,7 @@ def reconcile_medication(request: DatabasePatientRequest, db: Session = Depends(
             current_age=current_age,
             current_condition=current_condition,
             recent_procedures=recent_procedures,
-            medication=source.medication,
+            medication=source.get("medication"),
         )
 
         if medication_ok.upper() == "YES":
@@ -114,20 +116,20 @@ def reconcile_medication(request: DatabasePatientRequest, db: Session = Depends(
 
         # Increase reliability based on source reliability. Max score is 3.
 
-        if source.source_reliability == "low":
+        if reliability == "low":
             reliability_score[index] += LOW_SOURCE_VALIDITY_SCORE
             logger(index, "Add 1 for low site reliability")
             
-        elif source.source_reliability == "medium":
+        elif reliability == "medium":
             reliability_score[index] += MEDIUM_SOURCE_VALIDITY_SCORE
             logger(index, "Add 2 for medium site reliability")
-        elif source.source_reliability == "high":
+        elif reliability == "high":
             reliability_score[index] += MAX_SOURCE_VALIDITY_SCORE
             logger(index, "Add 3 for high site reliability")
 
         # This checks to see if date is the most recent. Max score is 3
 
-        recency = source.last_updated or source.last_filled
+        recency = source.get("last_updated") or source.get("last_filled")
 
         if recency is not None:
 
@@ -173,7 +175,7 @@ def reconcile_medication(request: DatabasePatientRequest, db: Session = Depends(
     runner_up_index = None
 
     for index, source in enumerate(actions):
-        print("ENTRY: " + str(index+1) + " | LOCATION: " + str(data.sources[index].system) + " ============================")
+        #print("ENTRY: " + str(index+1) + " | LOCATION: " + str(data.get(sources[index]).system) + " ============================")
         for log_action in source:
             print(log_action)
         print("SCORE: " + str(reliability_score[index]))
@@ -227,7 +229,7 @@ def reconcile_medication(request: DatabasePatientRequest, db: Session = Depends(
     )
 
     response = MedicationReconciliationResponse(
-        reconciliated_medication = medication_list[winning_index].medication,
+        reconciliated_medication = medication_list[winning_index].get("medication"),
         reasoning = reasoning_result['reasoning'],
         recommended_actions = reasoning_result['recommended_actions'],
         clinical_safety_check = reasoning_result['status'],

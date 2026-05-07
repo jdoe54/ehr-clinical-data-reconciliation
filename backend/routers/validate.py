@@ -66,8 +66,8 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
 
     # Check to see if date is not too long ago
          
-    if getattr(data, "last_updated"):
-        source_date = datetime.strptime(data.last_updated, "%Y-%m-%d").date()
+    if data.get("last_updated"):
+        source_date = datetime.strptime(data.get("last_updated"), "%Y-%m-%d").date()
         time_delta = current_date - source_date
 
         if time_delta.days > 180:
@@ -90,8 +90,8 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
     # Check to see DOB is not in the future
 
     if getattr(data, "demographics"):
-        if data.demographics.get("dob"):
-            source_date = datetime.strptime(data.last_updated, "%Y-%m-%d").date()
+        if data.get("demographics").get("dob"):
+            source_date = datetime.strptime(data.get("last_updated"), "%Y-%m-%d").date()
             time_delta = current_date - source_date
 
             if time_delta.days < 0:
@@ -101,8 +101,8 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
             logger("demograhics", "No date of birth present.", "high")
             clinical_plausibility_score -= 40
         
-        if data.demographics.get("gender"):
-            if data.demographics.get("gender") not in ALLOWED_GENDERS:
+        if data.get("demographics").get("gender"):
+            if data.get("demographics").get("gender") not in ALLOWED_GENDERS:
                 logger("demograhics", "Gender formatting issues.", "low")
                 accuracy_score -= 10
     else:
@@ -114,7 +114,7 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
 
     if hasattr(data, "allergies"):
    
-        if len(data.allergies) == 0:
+        if len(data.get("allergies")) == 0:
             logger("allergies", "No allergies documented. Include none documented", "low")
             completeness_score -= 20
     else:
@@ -124,8 +124,8 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
     # Check to see vital signs are not too crazy
 
     if getattr(data, "vital_signs"):
-        if data.vital_signs.get("blood_pressure"):
-            bp = data.vital_signs.get("blood_pressure").split("/")
+        if data.get("vital_signs").get("blood_pressure"):
+            bp = data.get("vital_signs").get("blood_pressure").split("/")
 
             # Check to see if format is correct
             if len(bp) == 1:
@@ -138,8 +138,8 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
                     clinical_plausibility_score -= 60
 
         # Check to see if HR is high or low
-        if data.vital_signs.get("heart_rate"):
-            hr = int(data.vital_signs.get("heart_rate"))
+        if data.get("vital_signs").get("heart_rate"):
+            hr = int(data.get("vital_signs").get("heart_rate"))
 
             if hr > MAX_BPM:
                 logger("heart_rate", "Too high heart rate,", "high")
@@ -160,7 +160,7 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
     if getattr(data, "medications"):
         current_meds = set()
 
-        for med in data.medications:
+        for med in data.get("medications"):
             med_word = re.sub(r"\s*\d.*$", "", med).strip().lower()
 
             if med in current_meds:
@@ -177,7 +177,7 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
         logger("conditions", "Missing conditions field", "low")
         completeness_score -= 20
     else:
-        if len(data.conditions) == 0:
+        if len(data.get("conditions")) == 0:
             logger("conditions", "No conditions documented. Include none documented", "low")
             completeness_score -= 20
 

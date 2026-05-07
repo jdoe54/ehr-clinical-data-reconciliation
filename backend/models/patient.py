@@ -16,5 +16,6 @@ class Patient(Base):
     date_of_birth: Mapped[date | None] = mapped_column(Date, nullable=True)
     age_years: Mapped[int] = mapped_column(Integer, nullable=True)
     gender: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    last_updated: Mapped[date] = mapped_column(Date, nullable=True)
 
     medications = relationship("Medication", back_populates="patient")
