@@ -1,3 +1,5 @@
+from datetime import date
+
 from pydantic import BaseModel
 from typing import Any, List, Dict, Optional
 
@@ -10,7 +12,7 @@ class MedicationSource(BaseModel):
     system: str
     medication: str
     last_filled: Optional[str] = None
-    last_updated: Optional[str] = None
+    last_updated: date | None = None
     source_reliability: str
 
 class MedicationReconciliationRequest(BaseModel):
@@ -48,6 +50,10 @@ class DataQualityResponse(BaseModel):
     breakdown: Breakdown
     issues_detected: List[DataIssueDetected]
 
+
+class DatabasePatientRequest(BaseModel):
+    patient_id: int | None = None
+    mrn: str | None = None
 
 
 class MedicationCreate(MedicationSource):

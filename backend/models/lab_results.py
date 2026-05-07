@@ -12,4 +12,3 @@ class Labs(Base):
     lab_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     value: Mapped[str | None] = mapped_column(String(100), nullable=True)
     unit: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    last_updated: Mapped[date] = mapped_column(Date, nullable=False)

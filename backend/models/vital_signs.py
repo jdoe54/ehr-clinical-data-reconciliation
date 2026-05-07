@@ -4,8 +4,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.database import Base
 
-class Patient(Base):
-    __tablename__ = "lab_results"
+class VitalSigns(Base):
+    __tablename__ = "vital_signs"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     patient_id: Mapped[int] = mapped_column(Integer, nullable=False)

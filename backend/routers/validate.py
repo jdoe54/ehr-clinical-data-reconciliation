@@ -1,7 +1,13 @@
 from fastapi import APIRouter, Depends
-from ..schema import DataIssueDetected, DataQualityRequest, DataQualityResponse, Breakdown
+from ..schema import DataIssueDetected, DataQualityRequest, DataQualityResponse, Breakdown, DatabasePatientRequest
 from ..auth import verify_token
 from datetime import datetime
+
+from sqlalchemy.orm import Session
+from backend.database import get_db
+
+
+from backend.services.record_service import build_patient_record
 
 
 import re
@@ -15,11 +21,16 @@ AI_MODEL = "gpt-5.4-nano"
 
 
 @router.post("/data-quality")
-def validate_data_quality(data: DataQualityRequest, token: str = Depends(verify_token)):
+def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends(get_db)):
+
+    # data: DataQualityRequest, token: str = Depends(verify_token)
 
     # high severity - physiologically implausible, 
     # medium severity - incomplete info and old date
     # low severity - formatting issues
+
+    data = build_patient_record(db, patient_id=request.patient_id, mrn=request.mrn)
+
 
     current_date = datetime.today().date()
 

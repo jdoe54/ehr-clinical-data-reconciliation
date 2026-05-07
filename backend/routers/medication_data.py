@@ -20,7 +20,7 @@ def get_medications_by_patient(patient_id: int, db: Session = Depends(get_db)):
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
     
-    return db.query("Medication").filter(Medication.patient_id == patient_id).all()
+    return db.query(Medication).filter(Medication.patient_id == patient_id).all()
 
 
 @router.post("/", response_model=MedicationRead)

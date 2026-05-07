@@ -12,7 +12,7 @@ class Medication(Base):
 
     system: Mapped[str] = mapped_column(String(100), nullable=False)
     medication: Mapped[str] = mapped_column(String(100), nullable=False)
-    last_updated: Mapped[date] = mapped_column(Date, nullable=False)
+    last_updated: Mapped[date] = mapped_column(Date, nullable=True)
     source_reliability: Mapped[str] = mapped_column(String(50), nullable=False)
 
     patient = relationship("Patient", back_populates="medications")

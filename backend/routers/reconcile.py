@@ -1,11 +1,18 @@
 from fastapi import APIRouter, Depends
-from ..schema import MedicationReconciliationRequest, MedicationReconciliationResponse
+from ..schema import DatabasePatientRequest, MedicationReconciliationRequest, MedicationReconciliationResponse
 from ..auth import verify_token
 from datetime import datetime
+from sqlalchemy.orm import Session
+from backend.database import get_db
+
+
 from backend.services.llm_service import (
     judge_medication_reasonableness,
     generate_reconciliation_reasoning,
 )
+
+from backend.services.record_service import build_patient_record
+
 
 
 import re
@@ -33,7 +40,11 @@ MAX_SCORE = MAX_WEIGHT_SCORE + MAX_ADDITIONAL_MED_SCORE + MAX_SOURCE_VALIDITY_SC
 
 
 @router.post("/medication")
-def reconcile_medication(data: MedicationReconciliationRequest, token: str = Depends(verify_token)):
+def reconcile_medication(request: DatabasePatientRequest, db: Session = Depends(get_db)):
+
+    data = build_patient_record(db, patient_id=request.patient_id, mrn=request.mrn)
+
+    # data: MedicationReconciliationRequest, token: str = Depends(verify_token)
 
     reliability_score = {}
     time_info = {}
@@ -51,10 +62,10 @@ def reconcile_medication(data: MedicationReconciliationRequest, token: str = Dep
 
     current_date = datetime.today().date()
 
-    medication_list = data.sources
-    current_condition = data.patient_context.conditions
-    current_age = data.patient_context.age
-    recent_procedures = data.patient_context.recent_labs
+    medication_list = data.get("medications")
+    current_condition = data.get("conditions")
+    current_age = data.get("age_years")
+    recent_procedures = data.get("lab_results")
 
     recent_date = None
     recent_date_index = None
@@ -62,6 +73,7 @@ def reconcile_medication(data: MedicationReconciliationRequest, token: str = Dep
 
 
     def logger(index: int, message: str):
+        print(message)
         actions[index].append(message)
 
     for index, source in enumerate(medication_list):
