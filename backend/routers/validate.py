@@ -65,9 +65,12 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
     
 
     # Check to see if date is not too long ago
+
+    print(data)
          
-    if data.get("last_updated"):
-        source_date = datetime.strptime(data.get("last_updated"), "%Y-%m-%d").date()
+    if data.get("patient").get("last_updated"):
+        print("Found last updated")
+        source_date = data.get("patient").get("last_updated")
         time_delta = current_date - source_date
 
         if time_delta.days > 180:
@@ -89,9 +92,9 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
     
     # Check to see DOB is not in the future
 
-    if getattr(data, "demographics"):
-        if data.get("demographics").get("dob"):
-            source_date = datetime.strptime(data.get("last_updated"), "%Y-%m-%d").date()
+    if data.get("patient"):
+        if data.get("patient").get("date_of_birth"):
+            source_date = data.get("patient").get("last_updated")
             time_delta = current_date - source_date
 
             if time_delta.days < 0:
@@ -101,8 +104,8 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
             logger("demograhics", "No date of birth present.", "high")
             clinical_plausibility_score -= 40
         
-        if data.get("demographics").get("gender"):
-            if data.get("demographics").get("gender") not in ALLOWED_GENDERS:
+        if data.get("patient").get("gender"):
+            if data.get("patient").get("gender") not in ALLOWED_GENDERS:
                 logger("demograhics", "Gender formatting issues.", "low")
                 accuracy_score -= 10
     else:
@@ -112,7 +115,7 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
     # Check to see if allergies has any values
 
 
-    if hasattr(data, "allergies"):
+    if data.get("allergies"):
    
         if len(data.get("allergies")) == 0:
             logger("allergies", "No allergies documented. Include none documented", "low")
@@ -123,9 +126,12 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
 
     # Check to see vital signs are not too crazy
 
-    if getattr(data, "vital_signs"):
-        if data.get("vital_signs").get("blood_pressure"):
-            bp = data.get("vital_signs").get("blood_pressure").split("/")
+    if data.get("vital_signs"):
+        vitals = data.get("vital_signs")
+        
+        
+        if vitals[0].get("systolic_bp") or vitals[0].get("diastolic_bp"):
+            bp = [vitals[0].get("systolic_bp"), vitals[0].get("diastolic_bp")]
 
             # Check to see if format is correct
             if len(bp) == 1:
@@ -138,8 +144,8 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
                     clinical_plausibility_score -= 60
 
         # Check to see if HR is high or low
-        if data.get("vital_signs").get("heart_rate"):
-            hr = int(data.get("vital_signs").get("heart_rate"))
+        if vitals[0].get("heart_rate"):
+            hr = int(vitals[0].get("heart_rate"))
 
             if hr > MAX_BPM:
                 logger("heart_rate", "Too high heart rate,", "high")
@@ -157,10 +163,10 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
     
     # Check to see if medications do not duplicate
 
-    if getattr(data, "medications"):
+    if data.get("medications"):
         current_meds = set()
 
-        for med in data.get("medications"):
+        for med in data.get("medications")[0]:
             med_word = re.sub(r"\s*\d.*$", "", med).strip().lower()
 
             if med in current_meds:
@@ -173,7 +179,7 @@ def validate_data_quality(request: DatabasePatientRequest, db: Session = Depends
         completeness_score -= 20
 
     # Checks to see if conditions does not exist
-    if getattr(data, "conditions") == False:
+    if data.get("conditions") == False:
         logger("conditions", "Missing conditions field", "low")
         completeness_score -= 20
     else:

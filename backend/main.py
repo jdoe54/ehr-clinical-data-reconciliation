@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from backend.routers import medication_data, reconcile, validate, patient, validate_data, allergies, conditions, labs
+from backend.routers import medication_data, reconcile, validate, patient, validate_data, allergies, conditions, labs, vital_signs
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -14,6 +14,7 @@ app.include_router(validate_data.router)
 app.include_router(allergies.router)
 app.include_router(conditions.router)
 app.include_router(labs.router)
+app.include_router(vital_signs.router)
 
 app.add_middleware(
     CORSMiddleware,

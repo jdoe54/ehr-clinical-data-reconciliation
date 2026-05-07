@@ -44,6 +44,7 @@ def build_patient_record(db: Session, patient_id: int | None = None, mrn: str | 
             "date_of_birth": serialize_date(patient.date_of_birth),
             "gender": patient.gender,
             "age_years": patient.age_years,
+            "last_updated": patient.last_updated,
         },
         "medications": [
             {
