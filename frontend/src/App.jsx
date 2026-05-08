@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { reconcileMedication, validateDataQuality } from './services/api'
-import { patients_data } from "./sample_data/patient";
+import { useEffect, useState } from 'react'
+import { reconcileMedication, validateDataQuality, fetchPatients, fetchConditions, fetchMedications } from './services/api'
+
 import PatientCard from "./components/PatientCard";
 import DataQualityModal from "./components/DataQualityModal";
 import ReconciliationModal from './components/ReconciliationModal';
@@ -9,23 +9,69 @@ import LoadingOverlay from './components/LoadingOverlay';
 export default function App() {
 
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  //const [loading, setLoading] = useState(false);
   
   const [qualityResult, setQualityResult] = useState(null);
-  const [selectedPatient, setSelectedPatient] = useState(patients_data[0]);
   const [showQualityModal, setShowQualityModal] = useState(false);
+
+  const [patients, setPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState(null);
 
   const [reconcileResult, setReconcileResult] = useState(null);
   const [showReconcileModal, setShowReconcileModal] = useState(null);
   const [reconcileLoading, setReconcileLoading] = useState(false);
+
+  const [selectedMedications, setSelectedMedications] = useState([]);
+  const [selectedConditions, setSelectedConditions] = useState([]);
+  const [patientDetailsLoading, setPatientDetailsLoading] = useState(false); 
+
+  useEffect(() => {
+    async function loadPatients() {
+      const data = await fetchPatients();
+
+      console.log(data)
+      setPatients(data);
+
+      
+    }
+
+    loadPatients();
+  }, []);
+
+
+  async function handleSelectPatient(patient) {
+    try {
+      setError("");
+      setSelectedPatient(patient);
+      setPatientDetailsLoading(true);
+
+      const [medications, conditions] = await Promise.all([
+        fetchMedications(patient.id),
+        fetchConditions(patient.id),
+      ]);
+
+      setSelectedMedications(medications);
+      setSelectedConditions(conditions);
+
+    } catch (err) {
+      console.error("handleSelectPatient error:", err);
+      setError(err.message || "Failed to load patient details.");
+      setSelectedMedications([]);
+      setSelectedConditions([]);
+    } finally {
+      setPatientDetailsLoading(false);
+    }
+  }
 
   async function handleReconcile() {
     try {
       setError("");
       setReconcileLoading(true);
 
-      const payload = selectedPatient.reconcilePayload;
-      const data = await reconcileMedication(payload);
+      const data = await reconcileMedication({
+        patient_id: selectedPatient.id,
+      });
+
 
       setReconcileResult(data);
       setShowReconcileModal(true);
@@ -41,8 +87,10 @@ export default function App() {
     try {
       setError("");
 
-      const payload = selectedPatient.dataQualityPayload
-      const data = await validateDataQuality(payload);
+     
+      const data = await validateDataQuality({
+        patient_id: selectedPatient.id,
+      });
 
       setQualityResult(data);
       setShowQualityModal(true);
@@ -72,47 +120,55 @@ export default function App() {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="space-y-4 lg:col-span-1">
-            {patients_data.map((patient) => (
+            {patients.map((patient) => (
               <PatientCard
                 key={patient.id}
                 patient={patient}
-                isSelected={selectedPatient.id === patient.id}
-                onSelect={setSelectedPatient}
+                isSelected={selectedPatient?.id === patient.id}
+                onSelect={() => handleSelectPatient(patient)}
+                conditions = {
+                  selectedPatient?.id === patient.id ? selectedConditions : []
+                }
+                medications = {
+                  selectedPatient?.id === patient.id ? selectedMedications : []
+                }
               />
             ))}
           </div>
 
           <div className="rounded-2xl bg-white p-6 shadow lg:col-span-2">
             <h3 className="text-2xl font-semibold text-slate-800">
-              {selectedPatient.name}
+              {"Bill"} 
             </h3>
+            
 
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="rounded-xl bg-slate-50 p-4">
                 <p className="text-sm font-medium text-slate-500">Age</p>
                 <p className="mt-1 text-lg font-semibold text-slate-800">
-                  {selectedPatient.reconcilePayload['patient_context'].age ?? "N/A"}
+                  
+                  {/*selectedPatient.reconcilePayload['patient_context'].age ?? "N/A"*/}
                 </p>
               </div>
 
               <div className="rounded-xl bg-slate-50 p-4">
                 <p className="text-sm font-medium text-slate-500">DOB</p>
                 <p className="mt-1 text-lg font-semibold text-slate-800">
-                  {selectedPatient.dataQualityPayload.demographics.dob ?? "N/A"}
+                  {/*selectedPatient.dataQualityPayload.demographics.dob ?? "N/A"*/}
                 </p>
               </div>
 
               <div className="rounded-xl bg-slate-50 p-4">
                 <p className="text-sm font-medium text-slate-500">Gender</p>
                 <p className="mt-1 text-lg font-semibold text-slate-800">
-                  {selectedPatient.dataQualityPayload.demographics.gender ?? "N/A"}
+                  {/*selectedPatient.dataQualityPayload.demographics.gender ?? "N/A"*/}
                 </p>
               </div>
 
               <div className="rounded-xl bg-slate-50 p-4">
                 <p className="text-sm font-medium text-slate-500">Last Updated</p>
                 <p className="mt-1 text-lg font-semibold text-slate-800">
-                  {selectedPatient.dataQualityPayload['last_updated'] ?? "N/A"}
+                  {/*selectedPatient.dataQualityPayload['last_updated'] ?? "N/A"*/}
                 </p>
               </div>
             </div>
@@ -120,23 +176,23 @@ export default function App() {
             <div className="mt-6">
               <p className="text-sm font-medium text-slate-700">Conditions</p>
               <div className="mt-2 flex flex-wrap gap-2">
-                {selectedPatient.reconcilePayload['patient_context'].conditions.map((condition) => (
+                {/*selectedPatient.reconcilePayload['patient_context'].conditions.map((condition) => (
                   <span
                     key={condition}
                     className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700"
                   >
                     {condition}
                   </span>
-                ))}
+                ))*/}
               </div>
             </div>
 
             <div className="mt-6">
               <p className="text-sm font-medium text-slate-700">Medications</p>
               <ul className="mt-2 list-inside list-disc text-slate-600">
-                {selectedPatient.dataQualityPayload.medications.map((med) => (
+                {/*selectedPatient.dataQualityPayload.medications.map((med) => (
                   <li key={med}>{med}</li>
-                ))}
+                ))*/}
               </ul>
             </div>
 

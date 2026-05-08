@@ -1,6 +1,37 @@
 const API_BASE = "http://127.0.0.1:8000";
 const TOKEN = "super-secret-ehr-token";
 
+
+export async function fetchPatients() {
+    const response = await fetch(`${API_BASE}/api/patients/patients`);
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch patients");
+    }
+
+    return response.json();
+}
+
+export async function fetchConditions(id) {
+    const response = await fetch(`${API_BASE}/api/conditions/patient/${id}`);
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch condition for patient");
+    }
+
+    return response.json();
+}
+
+export async function fetchMedications(id) {
+    const response = await fetch(`${API_BASE}/api/conditions/patient/${id}`);
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch patients");
+    }
+
+    return response.json();
+}
+
 export async function reconcileMedication(payload) {
     const response = await fetch(`${API_BASE}/api/reconcile/medication`, {
         method: "POST",
