@@ -132,13 +132,14 @@ export default function App() {
                 medications = {
                   selectedPatient?.id === patient.id ? selectedMedications : []
                 }
+                /*;*/
               />
             ))}
           </div>
-
+            
           <div className="rounded-2xl bg-white p-6 shadow lg:col-span-2">
             <h3 className="text-2xl font-semibold text-slate-800">
-              {"Bill"} 
+              { (selectedPatient?.first_name ?? "Patient") + " " + (selectedPatient?.last_name ?? selectedPatient?.id)} 
             </h3>
             
 
@@ -197,11 +198,17 @@ export default function App() {
             </div>
 
             <div className="mt-6 flex flex-row items-center gap-4">
-              <button onClick={handleReconcile} className="rounded-xl bg-slate-900 px-5 py-3 font-medium text-white shadow hover:bg-slate-600">
-                Run Reconciliation
-              </button>
+               {selectedPatient?.can_reconcile && (
+                <button
+                  onClick={handleReconcile}
+                  className="rounded-xl bg-slate-900 px-5 py-3 font-medium text-white shadow hover:bg-slate-600"
+                >
+                  Run Reconciliation
+                </button>
+              )}
 
-              <button onClick={handleQuality} className="rounded-xl bg-slate-900 px-5 py-3 font-medium text-white shadow hover:bg-slate-600">
+              <button onClick={handleQuality} 
+              className="rounded-xl bg-slate-900 px-5 py-3 font-medium text-white shadow hover:bg-slate-600">
                 Run Data Quality
               </button>
             </div>
