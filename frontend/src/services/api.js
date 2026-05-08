@@ -23,7 +23,7 @@ export async function fetchConditions(id) {
 }
 
 export async function fetchMedications(id) {
-    const response = await fetch(`${API_BASE}/api/conditions/patient/${id}`);
+    const response = await fetch(`${API_BASE}/api/medications/patient/${id}`);
 
     if (!response.ok) {
         throw new Error("Failed to fetch patients");

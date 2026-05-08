@@ -4,6 +4,7 @@ export default function PatientCard({ patient, medications, conditions, isSelect
       ? `${patient.first_name} ${patient.last_name}`
       : patient.mrn || `Patient ${patient.id}`;  
   
+  console.log("PatientCard medications: ", medications);
   return (
     <button
       onClick={onSelect}
@@ -44,12 +45,12 @@ export default function PatientCard({ patient, medications, conditions, isSelect
       <div className="mt-3">
         <p className="text-sm font-medium text-slate-700">Medications</p>
         <p className="mt-1 text-sm text-slate-600">
-          {medications.map((medications) => (
+          {medications.map((medication_entry) => (
             <span
-              key={medications.id}
+              key={medication_entry.id}
               className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700"
             >
-              {medications.medication}
+              {medication_entry.medication}
             </span>
           ))}
         </p>

@@ -147,28 +147,28 @@ export default function App() {
                 <p className="text-sm font-medium text-slate-500">Age</p>
                 <p className="mt-1 text-lg font-semibold text-slate-800">
                   
-                  {/*selectedPatient.reconcilePayload['patient_context'].age ?? "N/A"*/}
+                  {selectedPatient?.age_years ?? "N/A"}
                 </p>
               </div>
 
               <div className="rounded-xl bg-slate-50 p-4">
                 <p className="text-sm font-medium text-slate-500">DOB</p>
                 <p className="mt-1 text-lg font-semibold text-slate-800">
-                  {/*selectedPatient.dataQualityPayload.demographics.dob ?? "N/A"*/}
+                  {selectedPatient?.date_of_birth ?? "N/A"}
                 </p>
               </div>
 
               <div className="rounded-xl bg-slate-50 p-4">
                 <p className="text-sm font-medium text-slate-500">Gender</p>
                 <p className="mt-1 text-lg font-semibold text-slate-800">
-                  {/*selectedPatient.dataQualityPayload.demographics.gender ?? "N/A"*/}
+                  {selectedPatient?.gender ?? "N/A"}
                 </p>
               </div>
 
               <div className="rounded-xl bg-slate-50 p-4">
                 <p className="text-sm font-medium text-slate-500">Last Updated</p>
                 <p className="mt-1 text-lg font-semibold text-slate-800">
-                  {/*selectedPatient.dataQualityPayload['last_updated'] ?? "N/A"*/}
+                  {selectedPatient?.last_updated ?? "N/A"}
                 </p>
               </div>
             </div>
@@ -176,23 +176,23 @@ export default function App() {
             <div className="mt-6">
               <p className="text-sm font-medium text-slate-700">Conditions</p>
               <div className="mt-2 flex flex-wrap gap-2">
-                {/*selectedPatient.reconcilePayload['patient_context'].conditions.map((condition) => (
+                {selectedConditions.map((condition) => (
                   <span
                     key={condition}
                     className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700"
                   >
-                    {condition}
+                    {condition.condition_name}
                   </span>
-                ))*/}
+                ))}
               </div>
             </div>
 
             <div className="mt-6">
               <p className="text-sm font-medium text-slate-700">Medications</p>
               <ul className="mt-2 list-inside list-disc text-slate-600">
-                {/*selectedPatient.dataQualityPayload.medications.map((med) => (
-                  <li key={med}>{med}</li>
-                ))*/}
+                {selectedMedications.map((med) => (
+                  <li key={med}>{med.medication}</li>
+                ))}
               </ul>
             </div>
 
