@@ -11,6 +11,7 @@ This project includes:
 - A FastAPI backend for reconciliation and data quality scoring
 - A React frontend for patient review and result visualization
 - OpenAI integration for reasoning and safety-aware decision support
+- Postgres database that stores patient data.
 - Basic Bearer token authentication
 - Unit tests for core backend logic
 
@@ -23,6 +24,12 @@ The goal was to build a simple but clinician-friendly dashboard that presents AI
 - FastAPI TestClient / pytest — backend unit testing
 - Pydantic — request and response validation
 - OpenAI — LLM-based reasoning and medication judgment
+### Database
+- PostgreSQL
+- SQLAlchemy for ORM
+- Alembic for Database Migration
+### Containerization
+- Docker Compose
 ### Security
 - Simple Bearer token authentication is required for API access
 ### Testing
@@ -51,9 +58,29 @@ Accepts a patient record and returns data quality scores plus detected issues.
 ```cs
 OPENAI_API_KEY="your_openai_api_key_here"
 API_TOKEN="your_bearer_token_here"
+DATABASE_URL="postgresql+psycopg://postgres:postgres@localhost:5432/ehr_db"
+
 ```
 
-4. Run the Backend on terminal. 
+4. Start the PostgreSQL conainer from project root:
+
+```bash
+docker compose up -d db
+```
+
+You can seed sample clinical data with the following command.
+
+```bash
+python -m backend.seeder.
+```
+
+To perform migrations on the database, use the command.
+
+```bash
+alembic -c backend/alembic.ini upgrade head
+```
+
+5. Run the Backend on terminal. 
 
 ```bash
 uvicorn main:app --reload
@@ -124,15 +151,30 @@ To support that, I designed prompts that include:
 - Structured output expectations
 - A request for concise clinician-facing reasoning
 
-# Future Improvements
+# Recent Improvements
 
-If I had more time, I would have setup Docker containerization and deployment for easier setup. In addition, I would have included Postgres SQL database to store information. 
+Since initial version, I expanded the project from a static JSON-based prototype into a PostgreSQL-backend application. 
 
-# Time Spent: 
-25 hours and 44 minutes total between Friday to Sunday.
+Improvements include:
+- Adding PostgreSQL through Docker Compose.
+- Added SQLAlchemy models for patients, medications, allergies, conditions, lab results, and vital signs.
+- Updated endpoints to use database-backed patient records.
+- Updated frontend to fetch database tables using the API.
+
+# Future Improvements 
+
+- Adding Github Actions to incorporate CI/CD.
+- Adding JWT authentication.
+- Deploy application to cloud platform such as AWS.
+
+# Time Spent on Original: 
+25 hours and 44 minutes total between March 20 - 22.
 - 12 hours on backend logic and endpoint setup.
 - 2 hours on OpenAI LLM integration
 - 4 hours on test cases.
 - 1 hour on authentication
 - 6 hours on frontend setup and events. 
 
+# Time Spent on Improvement:
+
+Several focused developement sessions across May 5 - 8.
