@@ -1,6 +1,6 @@
 # EHR Clinical Data Reconciliation Engine Demo
 
-A full-stack project that simulates an AI-assisted EHR review workflow for clinicians. The application allows a user to review patient records, run medication reconciliation, evaluate data quality, and inspect AI-generated reasoning, confidence, and recommended actions.
+This project is a full-stack OpenAI-integrated EHR review tool that simulates how clinicians might reconcile conflicting patient records. The application stores structured patient data in PostgreSQL, exposes FastAPI endpoints for medication reconciliation and data quality validation, and uses OpenAI with Pydantic models to generate clinical reasoning, confidence scores, and recommended reviewer actions. The React interface allows users to inspect results, review AI-generated suggestions, and approve or reject reconciliation recommendations.
 
 ![Website Display](https://i.gyazo.com/6636bd58a2d0c101df8d1004276ddb44.gif)
 
