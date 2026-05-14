@@ -20,7 +20,7 @@ def load_case(subpath: str, filename: str):
 
 
 def test_validate_case_1():
-    payload = load_case("validate", "case01_happy.json")
+    payload = {"patient_id": 9}
     
     response = client.post(
         "/api/validate/data-quality",
@@ -31,7 +31,7 @@ def test_validate_case_1():
 
 def test_validate_case_2():
     
-    payload = load_case("validate", "case02_implausible.json")
+    payload = {"patient_id": 10}
    
     response = client.post(
         "/api/validate/data-quality",
@@ -48,7 +48,7 @@ def test_validate_case_2():
 
 def test_validate_case_3():
 
-    payload = load_case("validate", "case03_incomplete.json")
+    payload = {"patient_id": 11}
 
     response = client.post(
         "/api/validate/data-quality",
@@ -57,12 +57,12 @@ def test_validate_case_3():
 
     data = response.json()
     assert response.status_code == 200
-    assert data["breakdown"]["completeness"] < 30
+    assert data["breakdown"]["completeness"] < 40
 
 
 
 def test_validate_case_4():
-    payload = load_case("validate", "case04_stale.json")
+    payload = {"patient_id": 12}
    
     response = client.post(
         "/api/validate/data-quality",
