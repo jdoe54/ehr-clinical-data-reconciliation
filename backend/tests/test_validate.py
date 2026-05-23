@@ -20,7 +20,7 @@ def load_case(subpath: str, filename: str):
 
 
 def test_validate_case_1():
-    payload = {"patient_id": 9}
+    payload = {"patient_id": 5}
     
     response = client.post(
         "/api/validate/data-quality",
@@ -31,7 +31,7 @@ def test_validate_case_1():
 
 def test_validate_case_2():
     
-    payload = {"patient_id": 10}
+    payload = {"patient_id": 6}
    
     response = client.post(
         "/api/validate/data-quality",
@@ -48,7 +48,7 @@ def test_validate_case_2():
 
 def test_validate_case_3():
 
-    payload = {"patient_id": 11}
+    payload = {"patient_id": 7}
 
     response = client.post(
         "/api/validate/data-quality",
@@ -62,7 +62,7 @@ def test_validate_case_3():
 
 
 def test_validate_case_4():
-    payload = {"patient_id": 12}
+    payload = {"patient_id": 8}
    
     response = client.post(
         "/api/validate/data-quality",
