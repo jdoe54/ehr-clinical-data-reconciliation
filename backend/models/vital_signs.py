@@ -12,4 +12,4 @@ class VitalSigns(Base):
     systolic_bp: Mapped[str | None] = mapped_column(String(100), nullable=True)
     diastolic_bp: Mapped[str | None] = mapped_column(String(100), nullable=True)
     heart_rate: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    last_updated: Mapped[date] = mapped_column(Date, nullable=False)
+    last_updated: Mapped[date | None] = mapped_column(Date, nullable=True)
