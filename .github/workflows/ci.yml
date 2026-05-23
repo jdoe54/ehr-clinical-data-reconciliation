@@ -53,7 +53,7 @@ jobs:
 
       - name: Seed database
         run: |
-          python -m backend.Seed
+          python -m backend.seeder
 
       - name: Backend import check
         run: |
