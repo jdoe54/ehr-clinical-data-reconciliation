@@ -1,0 +1,8 @@
+fastapi[standard]
+pydantic
+openai
+python-dotenv
+psycopg[binary]
+sqlalchemy
+alembic
+pytest
