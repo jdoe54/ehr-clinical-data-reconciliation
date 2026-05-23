@@ -32,6 +32,7 @@ jobs:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/ehr_db
       OPENAI_API_KEY: dummy-ci-key
       API_TOKEN: dummy-ci-token
+      PYTHONPATH: ${{ github.workspace }}
 
     steps:
       - name: Checkout repository
@@ -62,7 +63,7 @@ jobs:
       - name: Run backend tests
         run: |
           pytest
-        continue-on-error: true
+        
   
   frontend:
     name: Frontend CI
