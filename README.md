@@ -83,7 +83,7 @@ alembic -c backend/alembic.ini upgrade head
 5. Run the Backend on terminal. 
 
 ```bash
-uvicorn main:app --reload
+uvicorn backend.main:app --reload
 ```
 
 5. Backend docs will be available at: http://127.0.0.1:8000/docs

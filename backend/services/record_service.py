@@ -27,6 +27,9 @@ def get_patient(db: Session, patient_id: int | None = None, mrn: str | None = No
 
 
 def build_patient_record(db: Session, patient_id: int | None = None, mrn: str | None = None):
+    print("Testing the building of the patient record")
+    print(mrn)
+    print(patient_id)
     patient = get_patient(db, patient_id=patient_id, mrn=mrn)
 
     medications = db.query(Medication).filter(Medication.patient_id == patient.id).all()

@@ -23,4 +23,4 @@ def get_validate_patient_data_by_mrn(mrn: str, db: Session = Depends(get_db)):
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
 
-    return build_patient_record(patient.id, db)
+    return build_patient_record(db, mrn=patient.mrn)
