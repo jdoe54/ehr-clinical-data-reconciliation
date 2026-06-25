@@ -23,7 +23,7 @@ def load_case(subpath: str, filename: str):
 @patch("backend.routers.reconcile.generate_reconciliation_reasoning")
 @patch("backend.routers.reconcile.judge_medication_reasonableness")
 def test_reconcile_case_1_returns_200(mock_judge, mock_reasoning):
-    payload = {"patient_id": 1}
+    payload = {"mrn": "RECON-CASE01_SINGLE"}
     mock_judge.return_value = "YES"
     mock_reasoning.return_value = {
         "reasoning": "Only available Hospital EHR entry shows Albuterol on 2024-10-15 with “high” severity, and no other asthma-related records are present in the provided data.",
@@ -46,7 +46,7 @@ def test_reconcile_case_1_returns_200(mock_judge, mock_reasoning):
 @patch("backend.routers.reconcile.generate_reconciliation_reasoning")
 @patch("backend.routers.reconcile.judge_medication_reasonableness")
 def test_reconcile_case_2_returns_200(mock_judge, mock_reasoning):
-    payload = {"patient_id": 2}
+    payload = {"mrn": "RECON-CASE02_DOSE"}
     mock_judge.return_value = "YES"
     mock_reasoning.return_value = {
         "reasoning": "Pharmacy record with Metformin 1000mg daily on 2025-01-25 is preferable to Hospital EHR noting 1000mg twice daily on 2024-10-15 because current dosing aligns better with renal risk at eGFR 45 and may reflect updated prescribing",
@@ -75,7 +75,7 @@ def test_reconcile_case_2_returns_200(mock_judge, mock_reasoning):
 @patch("backend.routers.reconcile.judge_medication_reasonableness")
 def test_reconcile_case_3_returns_200(mock_judge, mock_reasoning):
     # Hospital preference
-    payload = {"patient_id": 3}
+    payload = {"mrn": "RECON-CASE03_HOSPITAL"}
     mock_judge.return_value = "YES"
     mock_reasoning.return_value = {
         "reasoning": "With eGFR 72, metformin 1000mg BID documented in Hospital EHR on 2025-02-10 likely provides stronger glycemic control than the earlier pharmacy record of 1000mg daily (2025-01-25) while remaining renal-safe for a 67-year-old.",
@@ -102,7 +102,7 @@ def test_reconcile_case_3_returns_200(mock_judge, mock_reasoning):
 @patch("backend.routers.reconcile.judge_medication_reasonableness")
 def test_reconcile_case_4_returns_200(mock_judge, mock_reasoning):
     # Unsafe preference
-    payload = {"patient_id": 4}
+    payload = {"mrn": "RECON-CASE04_UNSAFE"}
     mock_judge.return_value = "YES"
     mock_reasoning.return_value = {
         "reasoning": "With eGFR 22, twice-daily metformin increases lactic-acidosis risk; the pharmacy record uses a lower 1000 mg daily dose and later review, making it a safer interim choice than the higher-dose hospital EHR entry",

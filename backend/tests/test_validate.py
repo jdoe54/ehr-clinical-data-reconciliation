@@ -66,7 +66,7 @@ def test_validate_case_3():
 
 
 def test_validate_case_4():
-    payload = {"mrn": "VALIDATE-CASE03_STALE"}
+    payload = {"mrn": "VALIDATE-CASE04_STALE"}
    
     response = client.post(
         "/api/validate/data-quality",
